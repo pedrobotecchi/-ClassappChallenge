@@ -13,6 +13,9 @@ The input file contains the following fields :
     -"Invisible"
     -"see_all"
 
+For reading the csv file, "fast-csv" was used.
+The ideia was to organize the header in a way that tags could be easily inserted in the output format, to do this the header was separated and treated individually, after that the entries were verified and inserted accordingly
+
 
 #### Some observation about the code
     -"eid" field works like an primary key, and two rows that have the same value must be converged into one.
