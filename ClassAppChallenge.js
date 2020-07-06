@@ -9,6 +9,7 @@
 const fs = require('fs'); // Read from the file system
 const csv = require("fast-csv");
 const _ = require('lodash');
+const Phone_ = require('libphonenumber-js').parsePhoneNumberFromString
 const PNF = require('google-libphonenumber').PhoneNumberFormat;
 const phoneUtil = require('google-libphonenumber').PhoneNumberUtil.getInstance();
 
@@ -146,14 +147,13 @@ function fomatDataCsv2JSON(dataInput){
                     // It's a phone then treat similarly to email's part 
                     listAddress = {}
                     try{
-                        // Try to validate the Phone number using google-libphonenumber
-                        const number = phoneUtil.parseAndKeepRawInput(dataRows[i][k], 'BR');
-                        if(phoneUtil.isValidNumberForRegion(number,'BR')){
-                            // If it's valid then create the address object
+                        // Try to validate the Phone number using libphonenumber
+                        const number = Phone_(dataRows[i][k], 'BR')
+                        if(number.isValid()){
+                            console.log("Number : ", number.number)
                             listAddress["type"] = newHeader[k][0]
                             listAddress["tags"] = _.drop(newHeader[k])
-                            const number = phoneUtil.parseAndKeepRawInput(dataRows[i][k], 'BR');
-                            listAddress["address"] = phoneUtil.format(number, PNF.E164)
+                            listAddress["address"] = number.number
                         }
                     } catch(err){
                         listAddress = {}
