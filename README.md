@@ -4,14 +4,14 @@ This program implements the ClassApp Challenge. The objective is to produce an s
 ## Implementation
 The input file contains the following fields : 
     
-    -"fullname"
-    -"eid"
-    -"class"
-    -"class"
-    -"email" containing tags
-    -"phone" containing tags
-    -"Invisible"
-    -"see_all"
+    "fullname"
+    "eid"
+    "class"
+    "class"
+    "email" containing tags
+    "phone" containing tags
+    "Invisible"
+    "see_all"
 
 For reading the csv file, "fast-csv" was used.
 The ideia was to organize the header in a way that tags could be easily inserted in the output format, to do this the header was separated and treated individually, after that the entries were verified and inserted accordingly
@@ -25,10 +25,10 @@ The ideia was to organize the header in a way that tags could be easily inserted
 ## Installation
 Before running the code, run:
 
-    `npm install`
+    npm install
 
 Make sure that you have installed Iodash, fast-csv and google-libphonenumber before running the code.
 
 Run:
 
-    `node ClassAppChallenge.js`
+    node ClassAppChallenge.js
