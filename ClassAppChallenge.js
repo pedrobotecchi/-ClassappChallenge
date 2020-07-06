@@ -44,20 +44,24 @@ function fomatDataCsv2JSON(dataInput){
         var newHeader = []                 // This VAR helds the new header, already organized
         var count = 0                      // Auxiliary var that controls newHeader insertion
     
-        console.log("HEADER : ",header)
     /*
         This loop organizes newHeader following some criterias.
         It sweeps header, searching for fields in header that have " " on it i.e email Responsável, Pai
         and put each word found this way in a vector, helping putting the fields "tags" correctly 
     */
     for(i = 0;i < header.length ;i++){
-        var words = header[i].split(' ')
+        var words = header[i].split(" ")
         var aux = []
         if(words.length != 1){          
             if(header[i][0] != " "){
-                aux.push(words[0])
-                for(j=1; j<words.length ; j++)
-                    aux.push(words[j])
+                aux.push(words[0]) 
+                // This for removes the "," that comes after an middle tag
+                for(j=1; j<words.length ; j++){
+                    if(j !== ((words.length) -1))
+                        aux.push(words[j].slice(0,words[j].length -1))
+                    else
+                        aux.push(words[j])
+                }
                 newHeader.push(aux)
                 count++
             }
@@ -86,7 +90,6 @@ function fomatDataCsv2JSON(dataInput){
     }
 
     var index;
-
     // This look check the data and insert into an object
     for(i = 0; i< dataRows.length; i++){
         // Checking for existing inserted data
@@ -94,12 +97,22 @@ function fomatDataCsv2JSON(dataInput){
         var j = 0
         var flag = true
 
+        var repeatedIndex = []    // This var controls when i insert a field with the same value, thar pair in the vector represents the positions
+        // This for searches for same inputs over dataRows[i], this will catch same emails or phones
+        for(j = 0; j < dataRows[i].length; j++){
+            for(k=j+1; k < dataRows[i].length; k++){
+                if((dataRows[i][j]!=="")&&(dataRows[i][j] === dataRows[i][k])){
+                    repeatedIndex.push(j)
+                    repeatedIndex.push(k)
+                }
+            }
+        }
+
         /*
             This find try to catch the eid of the inserted data to check if it was already inserted or not
             If it was, index saves the position returned by findIndex
         */
         index = _.findIndex(dataOutput,['eid', dataRows[i][1]])
-        console.log("j = ",index)
         if(index != -1)
             flag = false;
         
@@ -114,12 +127,11 @@ function fomatDataCsv2JSON(dataInput){
 
                     var emails = dataRows[i][k].split('/')  // Split the field to catch multiple emails inserted
                     var countEmail = 0                      // Hold the emails matrix index, helping to check if it's email is valid
+                    // This for cleans the ',' beetwen tags
                     do{
                         listAddress = {}
                         if(verifyEmail(emails[countEmail])){
                             listAddress["type"] = newHeader[k][0]        // Type receive only the first item
-                            // This for cleans the ',' beetwen tags
-                            for(n=1;n<(newHeader[k].length)-1;n++) newHeader[k][n] = newHeader[k][n].slice(0,(newHeader[k][n].length-1))
                             listAddress["tags"] = _.drop(newHeader[k])   // Tags receive the rest
                             listAddress["address"] = emails[countEmail]  // address receive the input value
                         }
@@ -139,8 +151,6 @@ function fomatDataCsv2JSON(dataInput){
                         if(phoneUtil.isValidNumberForRegion(number,'BR')){
                             // If it's valid then create the address object
                             listAddress["type"] = newHeader[k][0]
-                            // This for cleans the ',' beetwen tags
-                            for(n=1;n<(newHeader[k].length)-1;n++) newHeader[k][n] = newHeader[k][n].slice(0,(newHeader[k][n].length-1))
                             listAddress["tags"] = _.drop(newHeader[k])
                             const number = phoneUtil.parseAndKeepRawInput(dataRows[i][k], 'BR');
                             listAddress["address"] = phoneUtil.format(number, PNF.E164)
@@ -193,6 +203,33 @@ function fomatDataCsv2JSON(dataInput){
                 }
             }
         }
+
+
+        // There's repeated fields that may be concatenated
+        if(repeatedIndex.length>0){
+            // That the holds the last position to delete in case of having a duplicated field as input
+            var deleteAddress = -1
+            // This for searches for same inputs over dataRows[i], this will catch same emails or phones
+            for(j = 0; j < addresses.length; j++){
+                for(k=j+1; k < addresses.length; k++){
+                    if((addresses[j]["type"]) === (addresses[k]["type"])){
+                        if((addresses[j]["address"]) === (addresses[k]["address"])){
+                            addresses[j]["tags"] = addresses[j]["tags"].concat(addresses[k]["tags"])
+                            deleteAddress = k
+                        }
+                    }
+                }
+            }
+            // Remove the field
+            delete addresses[deleteAddress]
+
+            // Remove the empty field after the removal
+            addresses = addresses.filter(function (el) {
+                  return el != null;
+                });
+        }
+
+
         // If flag is true, then there's no record saved
         if(flag){            
             obj["classes"] = classesMatrix    // Save the classes
