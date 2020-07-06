@@ -150,7 +150,6 @@ function fomatDataCsv2JSON(dataInput){
                         // Try to validate the Phone number using libphonenumber
                         const number = Phone_(dataRows[i][k], 'BR')
                         if(number.isValid()){
-                            console.log("Number : ", number.number)
                             listAddress["type"] = newHeader[k][0]
                             listAddress["tags"] = _.drop(newHeader[k])
                             listAddress["address"] = number.number
