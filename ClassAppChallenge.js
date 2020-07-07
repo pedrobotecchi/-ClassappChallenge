@@ -98,13 +98,12 @@ function fomatDataCsv2JSON(dataInput){
         var j = 0
         var flag = true
 
-        var repeatedIndex = []    // This var controls when i insert a field with the same value, thar pair in the vector represents the positions
+        var flagRepeated = false    // This var controls if there is repeated fields and set up a flag used later
         // This for searches for same inputs over dataRows[i], this will catch same emails or phones
         for(j = 0; j < dataRows[i].length; j++){
             for(k=j+1; k < dataRows[i].length; k++){
                 if((dataRows[i][j]!=="")&&(dataRows[i][j] === dataRows[i][k])){
-                    repeatedIndex.push(j)
-                    repeatedIndex.push(k)
+                    flagRepeated = true
                 }
             }
         }
@@ -205,7 +204,7 @@ function fomatDataCsv2JSON(dataInput){
 
 
         // There's repeated fields that may be concatenated
-        if(repeatedIndex.length>0){
+        if(flagRepeated){
             // That the holds the last position to delete in case of having a duplicated field as input
             var deleteAddress = -1
             // This for searches for same inputs over dataRows[i], this will catch same emails or phones
@@ -246,6 +245,8 @@ function fomatDataCsv2JSON(dataInput){
             flag = true;
         }
     }
+
+    console.log(dataOutput)
 
     // With dataOutput formated, just write it on the JSON file names output
     const jsonString = JSON.stringify(dataOutput)
